@@ -1,0 +1,105 @@
+FP1. Match 3d objects
+
+Algorithm:
+
+iterate over the matches
+
+	find the prev point  and curr point in the matches
+
+	find the corresponding id of the bounding box in the previous frame and current frame
+	
+	if found store in a matrix where the rows represent previous frame ID and the columns current frame ID.
+		For every ID found increase the  cell of the matrix by one each time.
+ 
+	
+iterate over each row
+	
+	find the biggest value in the row. The value of this cell is the best bounding box pair in the previous frame and current frame.
+
+
+
+
+
+
+FP2. Compute Lidar TTC
+
+Get all  the points in previous frame in the x direction.
+
+Get all the points in current frame in the y direction.
+
+Compute Median as it is more robust to big outliers than the mean.
+
+Find the ttc  using:
+	(current median x * (1/frame rate))/(previous median x - current median x)
+
+
+
+
+
+
+
+FP3. Associate Keypoint Correspondences with Bounding Boxes
+
+For all matches that belong in the bounding box, store them in a vector.
+
+Get the mean size of the distances in this vector and get a minimum threshold value.
+
+If the matches are within this threshold put these points in Bounding Box KeyPoint Matches.
+
+
+
+
+
+FP4. Computer Camera TTC
+
+
+Find the points of the matches in the previous and current frame.
+
+See if the distance between these are within the mean threshold.
+
+And then compute the TTC using:
+	TTC = -(1/frame rate)/(1 - mean dist ratios)
+
+
+
+
+
+FP5. Evaluation
+
+   Detectors:         SHITOMASI,FAST,HARRIS,ORB,AKAZE,SIFT
+    Descriptors:    BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
+
+Lidar and Camera TTC were calculated and the results are in the Results folder.
+
+The default parameters for the matches were:
+
+Matcher Type:           MAT_BF  
+Descriptor Type:     DES_BINARY   except DES_HOG for SIFT
+Selector Type:          SEL_NN
+
+
+Though KNN and FLANN give more accurate matches, but there is always a trade off between accuracy and speed.
+Which was already looked at the mid term project.
+
+There were negative values for TTC and sometimes even NANs which were ignored.
+Below is the list 
+
+Detector	Descriptor	TTC lidar	TTC camera	TTC difference
+AKAZE	AKAZE	          11.729	      12.714	             -0.9852
+AKAZE	BRIEF	                  11.729	      12.36	             -0.63
+AKAZE	BRISK	                  11.729	      12.25	             -0.52
+AKAZE	SIFT	                  11.729	      12.47	             -0.744
+FAST	        BRIEF	                  11.729	      13.25	             -1.52
+FAST	        ORB	                  11.729	      14.99	             -3.26
+FAST	         SIFT	                  11.729	      14	                     -2.27
+ORB	        BRIEF	                  11.729	      17.5323	             -5.8
+ORB	         BRISK	                  11.729	      20.715	             -8.98
+SHITOMASI	ORB	          11.729	      12.34	             -0.615
+SHITOMASI	SIFT	          11.729	      12.26	             -0.53
+SHITOMASI	BRIEF	          11.729	      13.39	             -1.66
+SHITOMASI	BRIEF	          11.729	      13.164	             -1.43
+
+
+This shows that ShiTomasi and Akaze has values closest to the lidar TTC.
+
+
